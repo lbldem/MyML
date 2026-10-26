@@ -37,7 +37,7 @@ def cvae_loss(x_recon, x, mu, log_var):
 model = CVAE()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
-EPOCHS = 5
+EPOCHS = 30
 for epoch in range(EPOCHS):
     tot, tot_r, tot_k = 0, 0, 0
     for x, c in loader:
