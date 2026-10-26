@@ -1,0 +1,10 @@
+# Data and training results
+*.hdf5
+*.npy
+*.pt
+*.pkl
+*.png
+
+# Python cache
+__pycache__/
+.DS_Store
