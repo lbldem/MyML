@@ -13,6 +13,10 @@ Introducing different models significantly improved the expectation quality of t
 Still got works to be done!
 
 
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 # CaloChallenge DS2 생성 모델 진행 기록: NF부터 Hurdle CVAE + NF prior까지
 
 Oct 29, 2026 · @Se Joon Yim
@@ -264,6 +268,11 @@ VAE는 학습이 끝난 뒤 고정하고, 두 번째 단계에서 NF만 따로 �
 3. 생성할 때 `flow.sample(1, context=c).squeeze(1)`로 이벤트마다 z를 하나씩 뽑는다. 첫 인자는 차원이 아니라 조건당 개수다.
 
 VAE의 KL(이벤트 평균)은 "z가 담은 정보량 + z 분포와 N(0, I)의 차이"의 합이다. NF가 줄일 수 있는 건 뒷부분뿐이라, 기준선(N(0, I) 아래 NLL) 대비 개선폭은 0과 KL 사이에 있다. β = 1에서 기준선 88.43, 50 epoch 후 gain 5.51 nat(KL 10.7 중 최소 40% 이상이 prior hole이었다는 뜻).
+
+
+<img width="2400" height="1350" alt="image" src="https://github.com/user-attachments/assets/7aa97443-2580-4e90-9220-32add80850dd" />
+
+
 
 ## Classifier test
 
