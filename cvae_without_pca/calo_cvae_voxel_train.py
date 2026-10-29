@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset
 from calo_cvae_voxel_model import CVAE
 
-
+TAG = 'b01'
 
 class VoxelDataset(Dataset):
     def __init__(self, x_path, c):
@@ -28,7 +28,7 @@ torch.save({'log_E_min': log_E_min, 'log_E_max': log_E_max}, 'norm_params_voxel.
 dataset = VoxelDataset('train_voxel.npy', c_train)
 loader = DataLoader(dataset, batch_size=512, shuffle=True)
 
-BETA = 1.0
+BETA = 0.1
 def cvae_loss(x_recon, x, mu, log_var):
     recon_loss = F.mse_loss(x_recon, x, reduction='sum')
     kl_loss = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
@@ -50,4 +50,4 @@ for epoch in range(EPOCHS):
     n = len(loader.dataset)
     print(f"Epoch {epoch+1:2d}, loss={tot/n:.2f}, recon_loss={tot_r/n:.2f}, kl_loss={tot_k/n:.2f}")
 
-torch.save(model.state_dict(), 'calo_cvae_voxel.pt')
+torch.save(model.state_dict(), f'calo_cvae_voxel_{TAG}.pt')

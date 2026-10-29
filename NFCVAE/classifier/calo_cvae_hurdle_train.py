@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset
 from calo_cvae_hurdle_model import HurdleCVAE
 
+TAG = 'b01'
 
 class VoxelDataset(Dataset):
     def __init__(self, x_path, c):
@@ -27,7 +28,7 @@ torch.save({'log_E_min': log_E_min, 'log_E_max': log_E_max}, 'norm_params_voxel.
 dataset = VoxelDataset('train_voxel.npy', c_train)
 loader = DataLoader(dataset, batch_size=512, shuffle=True)
 
-BETA = 1.0
+BETA = 0.1
 def hurdle_loss(hit_logit, val, log_var_x, x, mu, log_var):
     log_var_x = log_var_x.clamp(-7, 3)
     hit = (x > 0).float()
@@ -54,4 +55,4 @@ for epoch in range(EPOCHS):
     n = len(loader.dataset)
     print(f"Epoch {epoch+1:2d}, loss={tot/n:.2f}, bce={tot_b/n:.2f}, nll={tot_n/n:.2f}, kl={tot_k/n:.2f}")
 
-torch.save(model.state_dict(), 'calo_cvae_hurdle.pt')
+torch.save(model.state_dict(), f'calo_cvae_hurdle_{TAG}.pt')

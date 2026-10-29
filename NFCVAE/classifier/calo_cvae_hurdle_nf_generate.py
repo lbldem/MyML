@@ -5,8 +5,9 @@ import matplotlib.pyplot as plt
 from calo_cvae_hurdle_model import HurdleCVAE, Z_DIM
 from z_prior_model import build_flow
 
-
+TAG = 'b01'
 MODE = 'nf_prior'   # 'generate', 'reconstruct', 'nf_prior'
+T = 1.0
 X_test = np.load('test_voxel.npy', mmap_mode = 'r')
 N = 20000
 THRESHOLD_MEV = 0.01515
@@ -16,7 +17,7 @@ THRESHOLD_MEV = 0.01515
 device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
 print("Device: ", device)
 model = HurdleCVAE()
-model.load_state_dict(torch.load('calo_cvae_hurdle.pt', map_location='cpu'))
+model.load_state_dict(torch.load(f'calo_cvae_hurdle_{TAG}.pt', map_location='cpu'))
 model.to(device)
 model.eval()
 norm = torch.load('norm_params_voxel.pt', weights_only=False)
@@ -39,7 +40,7 @@ Y_MAX = np.log1p(1e4)
 sig_sum, hit_sum = 0.0, 0.0
 
 flow = build_flow()
-flow.load_state_dict(torch.load('z_prior_nf.pt', map_location='cpu'))
+flow.load_state_dict(torch.load(f'z_prior_nf_{TAG}.pt', map_location='cpu'))
 flow.to(device)
 flow.eval()
 
@@ -55,9 +56,10 @@ with torch.no_grad():
             mu_z = model.fc_mu(h)
             lv_z = model.fc_log_var(h)
             z = model.reparametrize(mu_z, lv_z)
-        elif MODE == 'generate':
-            z = torch.randn(n, Z_DIM, device=device)
         elif MODE == 'nf_prior':
+            u = T * torch.randn(n, Z_DIM, device=device)
+            z, _ = flow._transform.inverse(u, context=Cb)
+        elif MODE == 'generate':
             z = flow.sample(1, context=Cb).squeeze(1)
         z_list.append(z.cpu().numpy())
         hit_logit, val, log_var_x = model.decode(z, Cb)
@@ -175,5 +177,5 @@ ax[1, 2].set_ylabel(f'Number of hits (N = {N} events)')
 for a in ax.flat:
     a.legend(fontsize=8)
 plt.tight_layout()
-plt.savefig(f'cvae_hurdle_comparison_{MODE}.png', dpi=150)
+plt.savefig(f'cvae_hurdle_comparison_{MODE}_T{T}_b01.png', dpi=150)
 plt.show()

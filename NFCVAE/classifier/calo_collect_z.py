@@ -2,10 +2,12 @@ import numpy as np
 import torch
 from calo_cvae_hurdle_model import HurdleCVAE
 
+TAG = 'b01'
+
 device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
 
 model = HurdleCVAE()
-model.load_state_dict(torch.load('calo_cvae_hurdle.pt', map_location='cpu'))
+model.load_state_dict(torch.load(f'calo_cvae_hurdle_{TAG}.pt', map_location='cpu'))
 model.to(device)
 model.eval()
 norm = torch.load('norm_params_voxel.pt', weights_only=False)
@@ -31,8 +33,8 @@ with torch.no_grad():
         z = model.reparametrize(mu_z, lv_z)
         z_list.append(z.cpu().numpy())
 Z = np.concatenate(z_list).astype(np.float32)
-np.save('train_z.npy', Z)
-np.save('train_c.npy', c_train.astype(np.float32))
+np.save(f'train_z_{TAG}.npy', Z)
+np.save(f'train_c_{TAG}.npy', c_train.astype(np.float32))
 print(Z.shape)
 print("z mean per dim: min %.2f max %.2f" % (Z.mean(0).min(), Z.mean(0).max()))
 print("z std  per dim: min %.2f max %.2f" % (Z.std(0).min(),  Z.std(0).max()))

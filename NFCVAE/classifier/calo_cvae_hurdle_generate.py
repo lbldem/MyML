@@ -4,6 +4,7 @@ from calo_cvae_hurdle_model import HurdleCVAE, Z_DIM
 from z_prior_model import build_flow
 from numpy.lib.format import open_memmap
 
+TAG = 'b01'
 MODE = 'nf_prior'   # 'generate', 'reconstruct', 'nf_prior'
 THRESHOLD_MEV = 0.01515
 
@@ -12,7 +13,7 @@ THRESHOLD_MEV = 0.01515
 device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
 print("Device: ", device)
 model = HurdleCVAE()
-model.load_state_dict(torch.load('calo_cvae_hurdle.pt', map_location='cpu'))
+model.load_state_dict(torch.load(f'calo_cvae_hurdle_{TAG}.pt', map_location='cpu'))
 model.to(device)
 model.eval()
 norm = torch.load('norm_params_voxel.pt', weights_only=False)
@@ -27,7 +28,7 @@ C = torch.tensor(c, dtype=torch.float32).to(device)
 y_thr = np.log1p(THRESHOLD_MEV / test_E * 1e4)
 Y_thr = torch.tensor(y_thr, dtype=torch.float32).to(device)
 
-G = open_memmap('gen_voxel.npy', mode='w+', dtype=np.float32, shape=(N, 6480))
+G = open_memmap(f'gen_voxel_{TAG}.npy', mode='w+', dtype=np.float32, shape=(N, 6480))
 
 
 # ── 2) Generation ────────────────────────────────────────────────────────
@@ -36,7 +37,7 @@ MAX_TRIES = 10
 Y_MAX = np.log1p(1e4)
 
 flow = build_flow()
-flow.load_state_dict(torch.load('z_prior_nf.pt', map_location='cpu'))
+flow.load_state_dict(torch.load(f'z_prior_nf_{TAG}.pt', map_location='cpu'))
 flow.to(device)
 flow.eval()
 
@@ -68,4 +69,4 @@ with torch.no_grad():
         print(f" {end}/{N}")
 
 G.flush()
-print("Saved gen_voxel.npy")
+print(f"Saved gen_voxel_{TAG}.npy")

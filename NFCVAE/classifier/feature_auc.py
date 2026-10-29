@@ -1,8 +1,10 @@
 import numpy as np
 from sklearn.metrics import roc_auc_score
 
+TAG = 'b01'
+
 R = np.load('test_voxel.npy', mmap_mode='r')
-G = np.load('gen_voxel.npy', mmap_mode='r')
+G = np.load(f'gen_voxel_{TAG}.npy', mmap_mode='r')
 E = np.load('test_energies.npy')[:, 0]      # This flattens our (100000, 1) array.
 
 def features(Y):

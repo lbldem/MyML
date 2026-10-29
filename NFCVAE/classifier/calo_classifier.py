@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics import roc_auc_score
 
+TAG = 'b01'
 device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
 
 # Conditions ────────────────────────────────────────────────────────────────────────────────────
@@ -87,7 +88,7 @@ for epoch in range(EPOCHS):
     print(f"Epoch {epoch+1:2d} train BCE = {tr:.4f} val BCE = {va:.4f}")
 
 clf.load_state_dict(best_state)
-torch.save(best_state, 'clf_best.pt')
+torch.save(best_state, f'clf_best_{TAG}.pt')
 
 # Scoring via AUC ───────────────────────────────────────────────────────────────────────────────
 clf.eval()

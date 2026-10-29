@@ -5,10 +5,12 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 from nflows import flows, distributions, transforms
 
+TAG = 'b01'
+
 device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
 
-Z = torch.tensor(np.load('train_z.npy')).to(device)      # (100000, 64)
-C = torch.tensor(np.load('train_c.npy')).to(device)      # (100000, 1)
+Z = torch.tensor(np.load(f'train_z_{TAG}.npy')).to(device)      # (100000, 64)
+C = torch.tensor(np.load(f'train_c_{TAG}.npy')).to(device)      # (100000, 1)
 DIM, C_DIM = Z.shape[1], C.shape[1]
 
 loader = DataLoader(TensorDataset(Z, C), batch_size=512, shuffle=True)
@@ -60,4 +62,4 @@ for epoch in range(EPOCHS):
     nll = tot / len(Z)
     print(f"Epoch {epoch+1:2d}  NLL={nll:.2f}  (gain over N(0,I): {base_nll - nll:.2f})")
 
-torch.save(flow.state_dict(), 'z_prior_nf.pt')
+torch.save(flow.state_dict(), f'z_prior_nf_{TAG}.pt')
