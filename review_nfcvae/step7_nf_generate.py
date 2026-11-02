@@ -1,8 +1,6 @@
 # step7_nf_generate.py — NF prior에서 z를 뽑아 decoder로 shower를 생성하고 실제와 비교
 import numpy as np
 import torch
-import h5py
-import matplotlib.pyplot as plt
 from common import DATA, OUT, device
 from step1_model import HurdleCVAE
 from step4_flow_model import build_flow
@@ -35,9 +33,9 @@ z_list = []
 with torch.no_grad():
     for start in range(0, N, BATCH):
         end = min(start + BATCH, N)
-        Cb, Yb = C[start:end], Y_thr[start:end]
+        Cb, Yb = C[start:end], Y_thr[start:end]9
         z = flow.sample(1, context=Cb).squeeze(1)
-        z = z * z_std + z_mean                                                                          # [B33] NF prior에서 이벤트당 z 하나. sample의 출력 shape (n, 1, 64)에 주의
+        z = z * z_std + z_mean                                                                          # [B33] NF prior에서 이벤트당 z 하나. sample의 출력 shape (N, 1, 64)에 주의
         z_list.append(z.cpu().numpy())
         hit_logit, val, log_var_x = model.decode(z, Cb)
         log_var_x = log_var_x.clamp(-7, 3)

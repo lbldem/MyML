@@ -18,7 +18,7 @@ with h5py.File(OUT / 'gen_std.hdf5', 'w') as f:
     for start in range(0, len(G), CHUNK):
         end = min(start + CHUNK, len(G))
         y = np.array(G[start:end])
-        E = y / E_inc[start:end]
+        E = (np.expm1(y) / 1e4) * E_inc[start:end]
         E[E < THRESHOLD_MEV] = 0.0
         S[start:end] = E
 
