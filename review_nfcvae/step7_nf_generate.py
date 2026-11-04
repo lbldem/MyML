@@ -33,7 +33,7 @@ z_list = []
 with torch.no_grad():
     for start in range(0, N, BATCH):
         end = min(start + BATCH, N)
-        Cb, Yb = C[start:end], Y_thr[start:end]9
+        Cb, Yb = C[start:end], Y_thr[start:end]
         z = flow.sample(1, context=Cb).squeeze(1)
         z = z * z_std + z_mean                                                                          # [B33] NF prior에서 이벤트당 z 하나. sample의 출력 shape (N, 1, 64)에 주의
         z_list.append(z.cpu().numpy())

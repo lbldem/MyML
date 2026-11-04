@@ -14,8 +14,8 @@ def layer_energies(split):
     for start in range(0, len(Y), CHUNK):
         end = min(start + CHUNK, len(Y))
         y = np.array(Y[start:end])                              # i.e. start=0 > y = Y[0:10000] ~ (10000, 6480)
-        E = (np.expm1(y) / 1e4) * E_inc[start:end]
-        E = E.reshape(-1, N_LAYER, N_VOX)
+        E = (np.expm1(y) / 1e4) * E_inc[start:end]              # y = log(1 + f * 10^4) where f = E_shower/E_inc    >>  E = true energy ~ (100000, 6480)
+        E = E.reshape(-1, N_LAYER, N_VOX)                       # E ~ (100000, 45, 144) >> axis=-1 makes .reshape automatically set appropriate axis.
         out[start:end] = np.sum(E, axis=-1)
     return out, E_inc
 
