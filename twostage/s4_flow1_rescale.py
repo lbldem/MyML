@@ -25,7 +25,7 @@ with h5py.File(HERE / 'gen_rescaled.hdf5', 'w') as dst:
         Ec = V.sum(axis=-1)         # CVAE layer energy ~ (n, 45)
         Ef = El_flow[s:s+CHUNK]     # Flow1 layer energy ~ (n, 45)
 
-        w = np.divide(Ef, Ec, out=np.zeros_like(Ec), where=(Ec !=0))    # ~ (n, 45)
+        w = np.divide(Ef, Ec, out=np.zeros_like(Ec), where=(Ec !=0))    # Ef/Ec ~ (n, 45) and if Ec=0, w=0
         V = V * w[:, :, None]       # (n, 45, 144) * (n, 45, 1) = (n, 45, 144)
         V[V < THRESHOLD] = 0.0
 

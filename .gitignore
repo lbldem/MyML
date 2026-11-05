@@ -4,6 +4,7 @@
 *.pt
 *.pkl
 *.png
+*.pdf
 
 # Python cache
 __pycache__/
