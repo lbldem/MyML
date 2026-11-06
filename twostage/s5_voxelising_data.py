@@ -33,7 +33,7 @@ for s in range(0, len(Ev), CHUNK):
     El = E.sum(axis=-1)                                 # El ~ (n, 45) >> energy sum over each layer
     x = np.where(E > 0, np.log10(np.maximum(E, THRESHOLD)), 
                  LOG_THR - rng.random(size=E.shape))    # x ~ (n, 45, 144) 
-    m = (El > 0)[:, :, None].astype(np.float64)         # m ~ (n, 45, 1) >> Putting "None" opens an axis.
+    m = (El > 0)[:, :, None].astype(np.float64)         # m ~ (n, 45, 1) boolean array >> Putting "None" opens an axis.
     S += (x * m).sum(axis=0)                            # x * m ~ (n, 45, 144) broadcasted.
     S2 += (x**2 * m).sum(axis=0)                        ## S was defined to bring us statistics.
     cnt += m.sum(axis=0)

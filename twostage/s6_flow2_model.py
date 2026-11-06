@@ -8,7 +8,7 @@ from s2_flow1_model_v3 import ContextNet
 N_LAYER, N_VOXEL = 45, 144
 CTX_RAW = 1 + 1 + N_LAYER + N_VOXEL       # = 191 = dim(E_inc + E(layer=l) + N_LAYER + N_VOXEL)
 
-def build_flow2(DIM=N_VOXEL, CTX_EMB=64, n_layers=8, hidden=256, num_bins=8, tail_bound=6.0):
+def build_flow2(DIM=N_VOXEL, CTX_EMB=64, n_layers=8, hidden=512, num_bins=8, tail_bound=6.0):
     embed = nn.Sequential(
         nn.Linear(CTX_RAW, 256), nn.ReLU(),
         nn.Linear(256, CTX_EMB))

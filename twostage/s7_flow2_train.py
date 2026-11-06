@@ -11,7 +11,7 @@ rng = np.random.default_rng(0)
 
 # 1. Loading data ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 Ev = np.load(HERE / 'train_voxelised.npy')                      # real, voxelised shower (N, 45, 144) MeV
-El = np.load(HERE / 'train_Elayer.npy')                         # real, **layerised shower** (N, 45) MeV
+El = np.load(HERE / 'train_Elayer.npy')                         # real, **layerised shower** (N, 45) MeV >> total energy of each layers
 E_inc = np.load(DATA / 'train_energies.npy')[:, 0]              # real, incident energy  (N, ) MeV
 norm = np.load(HERE / 'flow2_norm.npz')                         # normalisation of standardised voxelised data.
 v_mean, v_std = norm['v_mean'], norm['v_std']                   # (45, 144), (45, 144)
@@ -48,12 +48,12 @@ def make_batch(p):
     has = l > 0                                                                         # (B, ) bool >> has a previous layer?
     lp = l[has] - 1                                                                     # (#Trues in has, ) >> indices of previous layers
     prev[has] = (to_x(Ev[i[has], lp]) - v_mean[lp]) / v_std[lp]                         # (#Trues in has, 144)>> standardised shower of previous layers
-    c_el = ((np.log10(El[i, l] / E_inc[i]) - r_mean) / r_std).astype(np.float32)        # (B, ) >> 
+    c_el = ((np.log10(El[i, l] / E_inc[i]) - r_mean) / r_std).astype(np.float32)        # (B, ) >> context for a layer's energy El, standardised.
     ctx = np.concatenate((c_inc[i][:, None], c_el[:, None], ONEHOT[l], prev), axis=-1)  # None adds you an axis.
     return torch.from_numpy(x).to(device), torch.from_numpy(ctx).to(device)             # (B, 144), (B, 191) batched tensors
 
-va_sub = va_pairs[rng.choice(len(va_pairs), 20000, replace=False)]
-xv, cv = make_batch(va_sub)
+va_sub = va_pairs[rng.choice(len(va_pairs), 20000, replace=False)]                      # (20000, 2) >> random subset of evaluation pairs
+xv, cv = make_batch(va_sub)                                                             # (20000, 144), (20000, 191) >> x, context for evaluation.
 
 # 4. Training ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 flow = build_flow2().to(device)
@@ -65,8 +65,8 @@ best_val, best_state = float('inf'), None
 for epoch in range(EPOCHS):
     flow.train(); tot, n = 0.0, 0
     for step in range(STEPS):
-        p = tr_pairs[rng.integers(0, len(tr_pairs), BATCH)]
-        xb, cb = make_batch(p)
+        p = tr_pairs[rng.integers(0, len(tr_pairs), BATCH)]                             # (512, 2) >> training pair picked up at this step. (sampled with replacements)
+        xb, cb = make_batch(p)                                                          # (512, 144), (512, 191) >> x, context for the batch
         loss = -flow.log_prob(xb, context=cb).mean()
         if not torch.isfinite(loss):
             print("infinite loss, skipped a batch"); continue
